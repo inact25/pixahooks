@@ -1,19 +1,36 @@
-const useLocalStorage = (action: string, key: string, initialValue: any) => {
-  const setValue = (localKey: string, localValue: any) => {
-    localStorage.setItem(localKey, JSON.stringify(localValue));
+const useLocalStorage = (key: string, initialValue?: any) => {
+  const setValue = (value: any) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error(`Error setting localStorage key "${key}": `, error);
+    }
   };
 
-  const removeValue = (localKey: string) => {
-    localStorage.removeItem(localKey);
+  const getValue = () => {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : null;
+    } catch (error) {
+      console.error(`Error getting localStorage key "${key}": `, error);
+      return null;
+    }
   };
 
-  const getValue = (localKey: string) => {
-    return JSON.parse(localStorage.getItem(localKey) || 'null');
+  const removeValue = () => {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error(`Error removing localStorage key "${key}": `, error);
+    }
   };
 
-  if (action === 'get') return getValue(key);
-  if (action === 'set') setValue(key, initialValue);
-  if (action === 'remove') removeValue(key);
+  // Automatically set the initial value if it's provided and the key does not exist yet
+  if (initialValue !== undefined && getValue() === null) {
+    setValue(initialValue);
+  }
+
+  return { setValue, getValue, removeValue };
 };
 
-export {useLocalStorage};
+export { useLocalStorage };
